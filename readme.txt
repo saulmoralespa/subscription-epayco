@@ -1,4 +1,4 @@
-=== Subscription Payu Latam ===
+=== Subscription ePayco  ===
 Contributors: saulmorales
 Donate link: https://saulmoralespa.com/
 Tags: commerce, e-commerce, commerce, wordpress ecommerce, store, sales, sell, shop, shopping, cart, checkout, configurable, epayco, subscription
