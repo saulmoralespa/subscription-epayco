@@ -93,13 +93,15 @@ class Subscription_Epayco_SE_Plugin
     {
         $plugin_links = array();
         $plugin_links[] = '<a href="'.admin_url( 'admin.php?page=wc-settings&tab=checkout&section=subscription_epayco').'">' . esc_html__( 'Configuraciones') . '</a>';
-        $plugin_links[] = '<a href="https://saulmoralespa.github.io/subscription-epayco/">' . esc_html__( 'Documentación' ) . '</a>';
+        $plugin_links[] = '<a href="https://wordpress.org/plugins/subscription-epayco/">' . esc_html__( 'Documentación' ) . '</a>';
         return array_merge( $plugin_links, $links );
     }
 
     public function woocommerce_suscription_epayco_add_gateway($methods)
     {
-        $methods[] = 'WC_Payment_Subscription_Epayco_SE';
+
+        if (class_exists('WC_Subscriptions'))
+            $methods[] = 'WC_Payment_Subscription_Epayco_SE';
         return $methods;
     }
 

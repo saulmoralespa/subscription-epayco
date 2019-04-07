@@ -2,7 +2,7 @@
 /*
 Plugin Name: Subscription ePayco
 Description: Cobros periódicos, suscripciones de ePayco
-Version: 1.0.1
+Version: 1.0.2
 Author: Saul Morales Pacheco
 Author URI: https://saulmoralespa.com
 License: GNU General Public License v3.0
@@ -16,7 +16,7 @@ WC requires at least: 2.6
 if (!defined( 'ABSPATH' )) exit;
 
 if(!defined('SUBSCRIPTION_EPAYCO_SE_VERSION')){
-    define('SUBSCRIPTION_EPAYCO_SE_VERSION', '1.0.1');
+    define('SUBSCRIPTION_EPAYCO_SE_VERSION', '1.0.2');
 }
 
 add_action('plugins_loaded','subscription_epayco_se_init',0);
@@ -41,7 +41,7 @@ function subscription_epayco_se_init(){
 function subscription_epayco_se_notices( $notice ) {
     ?>
     <div class="error notice">
-        <p><?php echo esc_html( $notice ); ?></p>
+        <p><?php echo $notice; ?></p>
     </div>
     <?php
 }
@@ -117,8 +117,8 @@ function requeriments_subscription_epayco_se(){
 
     if (!class_exists('WC_Subscriptions')){
         if ( is_admin() && ! defined( 'DOING_AJAX' ) ) {
-            $url_docs = 'https://wordpress.org/plugins/subscription-payu-latam/#%C2%BF%20what%20else%20should%20i%20keep%20in%20mind%2C%20that%20you%20have%20not%20told%20me%20%3F';
-            $subs = __( 'Subscription ePayco: Las suscripciones de Woocommerce deben estar instaladas y activas, ') . sprintf(__('<a href="%s">'), $url_docs . __('verifique la documentación para ayuda') . '</a>' );
+            $url_docs = 'https://wordpress.org/plugins/subscription-epayco/#%C2%BF%20what%20else%20should%20i%20keep%20in%20mind%2C%20that%20you%20have%20not%20told%20me%20%3F';
+            $subs = __( 'Subscription ePayco: Las suscripciones de Woocommerce deben estar instaladas y activas, ') . sprintf(__('<a target="_blank" href="%s">'. __('verificar la documentación para ayuda') .'</a>'), $url_docs);
             add_action(
                 'admin_notices',
                 function() use($subs) {
@@ -126,7 +126,6 @@ function requeriments_subscription_epayco_se(){
                 }
             );
         }
-        return false;
     }
 
     $shop_currency = get_option('woocommerce_currency');

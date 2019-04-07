@@ -29,7 +29,7 @@
                 }else{
                     swal.fire({
                         title: 'Error al instalar',
-                        text: 'No se ha podido descargar y activar el plugin WooCommerce Subscriptions, intenta de nuevo o hazlo manualmente',
+                        text: 'No se ha podido descargar y activar el plugin "WooCommerce Subscriptions", intenta de nuevo o hazlo manualmente',
                         type: 'warning'
                     });
                 }

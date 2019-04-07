@@ -53,9 +53,7 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
 
         $product = $this->getProductFromOrder($order);
 
-        $order_currency = $order->get_currency();
-
-        $plan = $this->getPlanByProduct($product, $order_currency);
+        $plan = $this->getPlanByProduct($product, $order);
 
         $planCreate = array_merge(
             $plan, $this->getTrialDays($subscription),
@@ -91,6 +89,7 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
         }elseif ($sub->data->estado === 'Rechazada' || $sub->data->estado === ' Fallida'){
             $order->update_status('failed');
         }else{
+            //x_extra3
             $order->update_status('pending');
         }
 
@@ -284,19 +283,24 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
         return array_values($products)[0];
     }
 
-    public function getPlanByProduct($product, $order_currency)
+    public function getPlanByProduct($product, $order)
     {
+
+        $order_currency = $order->get_currency();
+        $total_discount = $order->get_total_discount();
+
         $product_name = $product['name'];
         $produt_name = $this->cleanCharacters($product_name);
         $product_id = $product['product_id'];
         $quantity =  $product['quantity'];
-        $planCode = "$produt_name-$product_id";
-        $planCode = $this->currency !== $order_currency ? "$planCode-$order_currency" : $planCode;
-        $planCode = $quantity > 1 ? "$planCode-$quantity" : "$planCode";
+        $plan_code = "$produt_name-$product_id";
+        $plan_code = $this->currency !== $order_currency ? "$plan_code-$order_currency" : $plan_code;
+        $plan_code = $quantity > 1 ? "$plan_code-$quantity" : "$plan_code";
+        $plan_code = $total_discount > 0 ? "$plan_code-$total_discount" : $plan_code;
         return array(
-            "id_plan" => $planCode,
-            "name" => "Plan $planCode",
-            "description" => "Plan $planCode",
+            "id_plan" => $plan_code,
+            "name" => "Plan $plan_code",
+            "description" => "Plan $plan_code",
             "currency" => $order_currency
         );
     }

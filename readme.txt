@@ -5,7 +5,7 @@ Tags: commerce, e-commerce, commerce, wordpress ecommerce, store, sales, sell, s
 Requires at least: 5.0
 Tested up to: 5.1
 Requires PHP: 5.6.0
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 License: GNU General Public License v3.0
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -37,6 +37,10 @@ Colombia
 
 Si. But it is advisable that you consider using it since it is revealing for browsers
 
+= What else should I keep in mind, that you have not told me ? =
+
+1. You need to use the [Woocommerce subscriptions](https://github.com/wp-premium/woocommerce-subscriptions "plugin")
+
 = Why is not charging in the indicated interval ? =
 
 **You can not change the price, interval and period of the subscription product once you have created it and you would have made at least the first subscription by a user**
@@ -49,6 +53,8 @@ Si. But it is advisable that you consider using it since it is revealing for bro
 
 = 1.0.1 =
 * Initial stable release
+= 1.0.2 =
+* Fixed install plugin subscriptions
 
 == Additional Info ==
 **Contribute** [repository on github](https://github.com/saulmoralespa/subscription-epayco)

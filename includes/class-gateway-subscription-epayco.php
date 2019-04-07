@@ -145,6 +145,17 @@ class WC_Payment_Subscription_Epayco_SE extends WC_Payment_Gateway
 
         subscription_epayco_se()->log($data);
 
+
+        /*$signature = hash('sha256',
+            $this->epayco_customerid.'^'
+            .$this->epayco_secretkey.'^'
+            .$validationData['x_ref_payco'].'^'
+            .$validationData['x_transaction_id'].'^'
+            .$validationData['x_amount'].'^'
+            .$validationData['x_currency_code']
+        );*/
+
+
         header("HTTP/1.1 200 OK");
     }
 }

@@ -72,29 +72,25 @@ class Subscription_Epayco_SE_Admin
 
         $status = array('status' => false);
 
-        if ( !is_wp_error( $file ) ) {
-
-            rename($file, $fileDownload);
-
-            $zip = new ZipArchive;
-            if ($zip->open($fileDownload) === TRUE) {
-                $zip->extractTo(WP_PLUGIN_DIR);
-                $zip->close();
-            } else {
-                unlink($fileDownload);
-                wp_die(wp_json_encode($status));
-            }
-
-            rename($fileCurrent, $fileNew);
-            unlink($fileDownload);
-            activate_plugin( $fileActive );
-
-            $status = array('status' => true);
+        if(is_wp_error( $file ))
             wp_die(wp_json_encode($status));
 
-            die();
-        }else{
+        rename($file, $fileDownload);
+
+        $zip = new ZipArchive;
+        if ($zip->open($fileDownload) === true) {
+            $zip->extractTo(WP_PLUGIN_DIR);
+            $zip->close();
+        } else {
+            unlink($fileDownload);
             wp_die(wp_json_encode($status));
         }
+
+        rename($fileCurrent, $fileNew);
+        unlink($fileDownload);
+        activate_plugin( $fileActive );
+
+        $status = array('status' => true);
+        wp_die(wp_json_encode($status));
     }
 }
