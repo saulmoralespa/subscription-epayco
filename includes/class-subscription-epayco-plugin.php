@@ -107,6 +107,26 @@ class Subscription_Epayco_SE_Plugin
 
     public function custom_woocommerce_billing_fields($fields)
     {
+
+        $fields['billing_type_document'] = array(
+            'label'       => __('Tipo de documento', 'subscription-epayco'),
+            'placeholder' => _x('', 'placeholder', 'subscription-epayco'),
+            'required'    => true,
+            'clear'       => false,
+            'type'        => 'select',
+            'default' => 'CC',
+            'options'     => array(
+                'CC' => __('Cédula de ciudadanía' ),
+                'CE' => __('Cédula de extranjería'),
+                'PPN' => __('Pasaporte'),
+                'SSN' => __('Número de seguridad social'),
+                'LIC' => __('Licencia de conducción'),
+                'NIT' => __('(NIT) Número de indentificación tributaria'),
+                'TI' => __('Tarjeta de identidad'),
+                'DNI' => __('Documento nacional de identificación')
+            )
+        );
+
         $fields['billing_dni'] = array(
             'label' => __('DNI', 'subscription-epayco'),
             'placeholder' => _x('Your DNI here....', 'placeholder', 'subscription-epayco'),

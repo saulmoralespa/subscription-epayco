@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Subscription ePayco\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-03-25 22:07+0000\n"
+"POT-Creation-Date: 2019-04-25 15:15+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: \n"
@@ -19,43 +19,52 @@ msgstr ""
 msgid "An internal error has arisen, try again"
 msgstr ""
 
-#: includes/class-subscription-epayco.php:87
+#: includes/class-subscription-epayco.php:86
 #, php-format
 msgid "Successful subscription (subscription ID: %s), reference (%s)"
 msgstr ""
 
-#: includes/class-subscription-epayco.php:282
+#: includes/class-subscription-epayco.php:281
 msgid ""
 "Currently Subscription ePayco does not support more than one product in the "
 "cart if one of the products is a subscription."
 msgstr ""
 
-#: includes/class-subscription-epayco-plugin.php:109
+#: includes/class-subscription-epayco-plugin.php:112
+msgid "Tipo de documento"
+msgstr ""
+
+#: includes/class-subscription-epayco-plugin.php:113
+msgctxt "placeholder"
+msgid ""
+msgstr ""
+
+#: includes/class-subscription-epayco-plugin.php:129
 msgid "DNI"
 msgstr ""
 
-#: includes/class-subscription-epayco-plugin.php:110
+#: includes/class-subscription-epayco-plugin.php:130
 msgctxt "placeholder"
 msgid "Your DNI here...."
 msgstr ""
 
-#: includes/class-subscription-epayco-plugin.php:129
+#: includes/class-subscription-epayco-plugin.php:151
 msgid "The type of card is not accepted"
 msgstr ""
 
-#: includes/class-subscription-epayco-plugin.php:130
+#: includes/class-subscription-epayco-plugin.php:152
 msgid "Enter the card information"
 msgstr ""
 
-#: includes/class-subscription-epayco-plugin.php:131
+#: includes/class-subscription-epayco-plugin.php:153
 msgid "Please wait..."
 msgstr ""
 
-#: includes/class-subscription-epayco-plugin.php:132
+#: includes/class-subscription-epayco-plugin.php:154
 msgid "Redirecting to verify status..."
 msgstr ""
 
-#: includes/class-subscription-epayco-plugin.php:133
+#: includes/class-subscription-epayco-plugin.php:155
 msgid "Card number, invalid"
 msgstr ""
 

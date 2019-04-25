@@ -2,21 +2,21 @@
 /*
 Plugin Name: Subscription ePayco
 Description: Cobros periódicos, suscripciones de ePayco
-Version: 1.0.2
+Version: 1.0.3
 Author: Saul Morales Pacheco
 Author URI: https://saulmoralespa.com
 License: GNU General Public License v3.0
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Text Domain: subscription-epayco
 Domain Path: /languages/
-WC tested up to: 3.5
+WC tested up to: 3.6
 WC requires at least: 2.6
 */
 
 if (!defined( 'ABSPATH' )) exit;
 
 if(!defined('SUBSCRIPTION_EPAYCO_SE_VERSION')){
-    define('SUBSCRIPTION_EPAYCO_SE_VERSION', '1.0.2');
+    define('SUBSCRIPTION_EPAYCO_SE_VERSION', '1.0.3');
 }
 
 add_action('plugins_loaded','subscription_epayco_se_init',0);

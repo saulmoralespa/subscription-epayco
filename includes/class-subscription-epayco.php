@@ -73,7 +73,8 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
             "id_plan" => $planCreate['id_plan'],
             "customer" => $customer->data->customerId,
             "token_card" => $token->data->id,
-            "doc_number" => get_post_meta( $subscription->get_id(), '_billing_dni', true )
+            "doc_number" => get_post_meta( $subscription->get_id(), '_billing_dni', true ),
+            "type_document" => get_post_meta( $subscription->get_id(), '_billing_type_document', true )
         );
 
         $this->subscriptionCreate($subscriptionCreate);
@@ -89,7 +90,6 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
         }elseif ($sub->data->estado === 'Rechazada' || $sub->data->estado === ' Fallida'){
             $order->update_status('failed');
         }else{
-            //x_extra3
             $order->update_status('pending');
         }
 
@@ -189,7 +189,7 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
                 "id_plan" => $data['id_plan'],
                 "customer" => $data['customer'],
                 "token_card" => $data['token_card'],
-                "doc_type" => "CC",
+                "doc_type" => $data['type_document'],
                 "doc_number" => $data['doc_number']
             )
             );
@@ -210,7 +210,7 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
                     "id_plan" => $data['id_plan'],
                     "customer" => $data['customer'],
                     "token_card" => $data['token_card'],
-                    "doc_type" => "CC",
+                    "doc_type" => $data['type_document'],
                     "doc_number" => $data['doc_number'],
                     "url_confirmation" => $this->getUrlNotify()
                 )
