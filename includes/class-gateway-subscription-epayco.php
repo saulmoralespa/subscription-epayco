@@ -28,6 +28,8 @@ class WC_Payment_Subscription_Epayco_SE extends WC_Payment_Gateway
         $this->isTest = (bool)$this->get_option( 'environment' );
         $this->debug = $this->get_option( 'debug' );
         $this->currency = get_option('woocommerce_currency');
+        $this->custIdCliente = $this->get_option('custIdCliente');
+        $this->pKey = $this->get_option('pKey');
         $this->apiKey = $this->get_option('apiKey');
         $this->privateKey = $this->get_option('privateKey');
 
@@ -143,19 +145,54 @@ class WC_Payment_Subscription_Epayco_SE extends WC_Payment_Gateway
         $body = file_get_contents('php://input');
         parse_str($body, $data);
 
-        subscription_epayco_se()->log($data);
+        $x_signature = $data['x_signature'];
 
+        $signature = hash('sha256',
+            $this->custIdCliente.'^'
+            .$this->pKey.'^'
+            .$data['x_ref_payco'].'^'
+            .$data['x_transaction_id'].'^'
+            .$data['x_amount'].'^'
+            .$data['x_currency_code']
+        );
 
-        /*$signature = hash('sha256',
-            $this->epayco_customerid.'^'
-            .$this->epayco_secretkey.'^'
-            .$validationData['x_ref_payco'].'^'
-            .$validationData['x_transaction_id'].'^'
-            .$validationData['x_amount'].'^'
-            .$validationData['x_currency_code']
-        );*/
-
+        if ($x_signature === $signature)
+            $this->check_order($data);
 
         header("HTTP/1.1 200 OK");
+    }
+
+    public function check_order($data)
+    {
+        global $wpdb;
+        $table_subscription_epayco = $wpdb->prefix . 'subscription_epayco';
+        $x_cod_transaction_state = $data['x_cod_transaction_state'];
+        $x_ref_payco = $data['x_ref_payco'];
+        $subscription_id = $data['x_extra1'];
+        $query = "SELECT order_id FROM $table_subscription_epayco WHERE ref_payco='$x_ref_payco'";
+        $query_delete = "DELETE FROM $table_subscription_epayco WHERE ref_payco='$x_ref_payco'";
+
+        if ($x_cod_transaction_state == 3)
+            return;
+
+        $result = $wpdb->get_row( $query );
+
+        if (empty($result))
+            return;
+
+        $order_id = $result->order_id;
+        $subscription = new WC_Subscription($order_id);
+
+        if ($x_cod_transaction_state == 1){
+            $subscription->payment_complete();
+            $note  = sprintf(__('Successful subscription (subscription ID: %s), reference (%s)', 'subscription-epayco'),
+                $subscription_id, $x_ref_payco);
+            $subscription->add_order_note($note);
+        }else{
+            $subscription->payment_failed();
+        }
+
+        $wpdb->query($query_delete);
+
     }
 }

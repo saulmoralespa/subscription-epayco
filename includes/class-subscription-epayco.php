@@ -31,6 +31,9 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
 
     public function subscription_epayco($params)
     {
+        global $wpdb;
+        $table_subscription_epayco = $wpdb->prefix . 'subscription_epayco';
+
         $order_id = $params['id_order'];
         $order = new WC_Order($order_id);
 
@@ -91,6 +94,15 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
             $order->update_status('failed');
         }else{
             $order->update_status('pending');
+
+            $wpdb->insert(
+                $table_subscription_epayco,
+                array(
+                    'order_id' => $subscription->get_id(),
+                    'ref_payco' => $sub->data->ref_payco
+                )
+            );
+
         }
 
         update_post_meta($subscription->get_id(), 'id_client', $customer->data->customerId);

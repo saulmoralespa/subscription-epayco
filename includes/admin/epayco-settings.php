@@ -45,6 +45,22 @@ return array(
             true => __( 'Test' ),
         ),
     ),
+    'custIdCliente' => array(
+        'title' => __('P_CUST_ID_CLIENTE'),
+        'type' => 'text',
+        'description' => __(''),
+        'default' => '',
+        'desc_tip' => true,
+        'placeholder' => ''
+    ),
+    'pKey' => array(
+        'title' => __('P_KEY'),
+        'type' => 'text',
+        'description' => __(''),
+        'default' => '',
+        'desc_tip' => true,
+        'placeholder' => ''
+    ),
     'apiKey' => array(
         'title' => __('Apikey'),
         'type' => 'text',
