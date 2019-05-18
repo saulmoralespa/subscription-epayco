@@ -145,6 +145,9 @@ class WC_Payment_Subscription_Epayco_SE extends WC_Payment_Gateway
         $body = file_get_contents('php://input');
         parse_str($body, $data);
 
+        if($this->debug === 'yes')
+            subscription_epayco_se()->log($data);
+
         $x_signature = $data['x_signature'];
 
         $signature = hash('sha256',

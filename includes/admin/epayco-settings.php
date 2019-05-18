@@ -48,7 +48,7 @@ return array(
     'custIdCliente' => array(
         'title' => __('P_CUST_ID_CLIENTE'),
         'type' => 'text',
-        'description' => __(''),
+        'description' => __('La encuentra en el panel de ePayco, integraciones, Llaves API'),
         'default' => '',
         'desc_tip' => true,
         'placeholder' => ''
@@ -56,23 +56,23 @@ return array(
     'pKey' => array(
         'title' => __('P_KEY'),
         'type' => 'text',
-        'description' => __(''),
+        'description' => __('La encuentra en el panel de ePayco, integraciones, Llaves API'),
         'default' => '',
         'desc_tip' => true,
         'placeholder' => ''
     ),
     'apiKey' => array(
-        'title' => __('Apikey'),
+        'title' => __('PUBLIC_KEY'),
         'type' => 'text',
-        'description' => __(''),
+        'description' => __('La encuentra en el panel de ePayco, integraciones, Llaves API'),
         'default' => '',
         'desc_tip' => true,
         'placeholder' => ''
     ),
     'privateKey' => array(
-        'title' => __('PrivateKey'),
+        'title' => __('PRIVATE_KEY'),
         'type' => 'text',
-        'description' => __(''),
+        'description' => __('La encuentra en el panel de ePayco, integraciones, Llaves API'),
         'default' => '',
         'desc_tip' => true,
         'placeholder' => ''

@@ -84,17 +84,23 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
 
         $sub = $this->subscriptionCharge($subscriptionCreate);
 
-        if ($sub->data->estado === 'Aceptada'){
+        if($this->debug === 'yes')
+            subscription_epayco_se()->log(print_r($sub, true));
+
+
+        if(isset($sub->data->status) && $sub->data->status === 'error')
+            return array('status' => false, 'message' =>  $sub->data->description);
+
+        if ($sub->data->cod_respuesta === 2 || $sub->data->data->cod_respuesta === 4)
+            return array('status' => false, 'message' =>  "{$sub->data->estado}: {$sub->data->respuesta}");
+
+        if ($sub->data->cod_respuesta === 1){
             $order->payment_complete();
             $note  = sprintf(__('Successful subscription (subscription ID: %s), reference (%s)', 'subscription-epayco'),
                 $sub->subscription->_id, $sub->data->ref_payco);
             $subscription->add_order_note($note);
-
-        }elseif ($sub->data->estado === 'Rechazada' || $sub->data->estado === ' Fallida'){
-            $order->update_status('failed');
         }else{
             $order->update_status('pending');
-
             $wpdb->insert(
                 $table_subscription_epayco,
                 array(
