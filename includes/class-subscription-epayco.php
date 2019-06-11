@@ -61,9 +61,9 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
         $planCreate = array_merge(
             $plan, $this->getTrialDays($subscription),
             array(
-                "interval" => $subscription->billing_period,
+                "interval" => $subscription->get_billing_period(),
                 "amount" => WC_Subscriptions_Order::get_recurring_total( $order ),
-                "interval_count" => WC_Subscriptions_Order::get_subscription_interval( $order )
+                "interval_count" => $subscription->get_billing_interval()
 
             )
         );
@@ -91,7 +91,7 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
         if(isset($sub->data->status) && $sub->data->status === 'error')
             return array('status' => false, 'message' =>  $sub->data->description);
 
-        if ($sub->data->cod_respuesta === 2 || $sub->data->data->cod_respuesta === 4)
+        if ($sub->data->cod_respuesta === 2 || $sub->data->cod_respuesta === 4)
             return array('status' => false, 'message' =>  "{$sub->data->estado}: {$sub->data->respuesta}");
 
         if ($sub->data->cod_respuesta === 1){
@@ -150,6 +150,7 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
                 "name" => $data['name'],
                 "email" => $data['email'],
                 "phone" => $data['phone'],
+                "address" => $data['address'],
                 "default" => true
             )
             );
@@ -230,6 +231,7 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
                     "token_card" => $data['token_card'],
                     "doc_type" => $data['type_document'],
                     "doc_number" => $data['doc_number'],
+                    "ip" => $this->getIP(),
                     "url_confirmation" => $this->getUrlNotify()
                 )
             );
@@ -286,6 +288,7 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
         $data['name'] =  $subscription->get_shipping_first_name() ? $subscription->get_shipping_first_name() . " " . $subscription->get_shipping_last_name() : $subscription->get_billing_first_name() . " " . $subscription->get_billing_last_name();
         $data['email'] = $subscription->get_billing_email();
         $data['phone'] = $subscription->get_billing_phone();
+        $data['address'] = $subscription->get_shipping_address_1() ? $subscription->get_shipping_address_1() . " " . $subscription->get_shipping_address_2() : $subscription->get_billing_address_1() . " " . $subscription->get_billing_address_2();
 
         return $data;
     }
@@ -347,5 +350,12 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
     {
         $url = trailingslashit(get_bloginfo( 'url' )) . trailingslashit('wc-api') . strtolower(get_parent_class($this));
         return $url;
+    }
+
+    public function getIP()
+    {
+        return ($_SERVER['REMOTE_ADDR'] == '::1' || $_SERVER['REMOTE_ADDR'] == '::' ||
+            !preg_match('/^((?:25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9]).){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])$/m',
+                $_SERVER['REMOTE_ADDR'])) ? '127.0.0.1' : $_SERVER['REMOTE_ADDR'];
     }
 }
