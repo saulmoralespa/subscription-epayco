@@ -2,7 +2,7 @@
 /*
 Plugin Name: Subscription ePayco
 Description: Cobros periódicos, suscripciones de ePayco
-Version: 1.0.7
+Version: 1.0.8
 Author: Saul Morales Pacheco
 Author URI: https://saulmoralespa.com
 License: GNU General Public License v3.0
@@ -16,7 +16,7 @@ WC requires at least: 2.6
 if (!defined( 'ABSPATH' )) exit;
 
 if(!defined('SUBSCRIPTION_EPAYCO_SE_VERSION')){
-    define('SUBSCRIPTION_EPAYCO_SE_VERSION', '1.0.7');
+    define('SUBSCRIPTION_EPAYCO_SE_VERSION', '1.0.8');
 }
 
 add_action('plugins_loaded','subscription_epayco_se_init',0);

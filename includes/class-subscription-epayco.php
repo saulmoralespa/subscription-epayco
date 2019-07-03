@@ -150,6 +150,7 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
                 "name" => $data['name'] . ' ' . $data['last_name'],
                 "email" => $data['email'],
                 "phone" => $data['phone'],
+                "cell_phone" => $data['phone'],
                 "country" =>  $data['country'],
                 "city" => $data['city'],
                 "address" => $data['address'],

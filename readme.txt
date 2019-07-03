@@ -5,7 +5,7 @@ Tags: commerce, e-commerce, commerce, wordpress ecommerce, store, sales, sell, s
 Requires at least: 5.0
 Tested up to: 5.1
 Requires PHP: 5.6.0
-Stable tag: 1.0.7
+Stable tag: 1.0.8
 License: GNU General Public License v3.0
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -65,6 +65,8 @@ Si. But it is advisable that you consider using it since it is revealing for bro
 * Added address and ip
 = 1.0.7 =
 * Added address parameters
+= 1.0.8 =
+* Added cell_phone parameter
 
 == Additional Info ==
 **Contribute** [repository on github](https://github.com/saulmoralespa/subscription-epayco)
