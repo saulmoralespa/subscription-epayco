@@ -147,9 +147,11 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
             $customer = $this->epayco->customer->create(
                 array(
                 "token_card" => $data['token_card'],
-                "name" => $data['name'],
+                "name" => $data['name'] . ' ' . $data['last_name'],
                 "email" => $data['email'],
                 "phone" => $data['phone'],
+                "country" =>  $data['country'],
+                "city" => $data['city'],
                 "address" => $data['address'],
                 "default" => true
             )
@@ -283,11 +285,14 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
 
     public function paramsBilling($subscription)
     {
-        $data = array();
+        $data = [];
 
-        $data['name'] =  $subscription->get_shipping_first_name() ? $subscription->get_shipping_first_name() . " " . $subscription->get_shipping_last_name() : $subscription->get_billing_first_name() . " " . $subscription->get_billing_last_name();
+        $data['name'] =  $subscription->get_shipping_first_name() ? $subscription->get_shipping_first_name() : $subscription->get_billing_first_name();
+        $data['last_name'] = $subscription->get_shipping_last_name() ? $subscription->get_shipping_last_name() : $subscription->get_billing_last_name();
         $data['email'] = $subscription->get_billing_email();
         $data['phone'] = $subscription->get_billing_phone();
+        $data['country'] = $subscription->get_shipping_country() ? $subscription->get_shipping_country() : $subscription->get_billing_country();
+        $data['city'] = $subscription->get_shipping_city() ? $subscription->get_shipping_city() : $subscription->get_billing_city();
         $data['address'] = $subscription->get_shipping_address_1() ? $subscription->get_shipping_address_1() . " " . $subscription->get_shipping_address_2() : $subscription->get_billing_address_1() . " " . $subscription->get_billing_address_2();
 
         return $data;
