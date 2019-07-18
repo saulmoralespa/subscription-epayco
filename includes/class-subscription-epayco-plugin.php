@@ -147,11 +147,12 @@ class Subscription_Epayco_SE_Plugin
             wp_localize_script( 'subscription-epayco', 'subscription_epayco', array(
                 'ajaxurl' => admin_url( 'admin-ajax.php' ),
                 'country' => WC()->countries->get_base_country(),
-                'msjNoCard' => __('The type of card is not accepted','subscription-epayco'),
-                'msjEmptyInputs' => __('Enter the card information','subscription-epayco'),
-                'msjProcess' => __('Please wait...','subscription-epayco'),
-                'msjReturn' => __('Redirecting to verify status...','subscription-epayco'),
-                'msjNoCardValidate' => __('Card number, invalid','subscription-epayco')
+                'msgNoCard' => __('The type of card is not accepted','subscription-epayco'),
+                'msgEmptyInputs' => __('Enter the card information','subscription-epayco'),
+                'msgProcess' => __('Please wait...','subscription-epayco'),
+                'msgReturn' => __('Redirecting to verify status...','subscription-epayco'),
+                'msgNoCardValidate' => __('Card number, invalid','subscription-epayco'),
+                'msgValidateDate' => __('Invalid card expiration date','subscription-epayco')
             ) );
             wp_enqueue_style('frontend-subscription-epayco', $this->plugin_url . 'assets/css/subscription-epayco.css', array(), $this->version, null);
         }

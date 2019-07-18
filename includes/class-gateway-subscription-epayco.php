@@ -17,10 +17,11 @@ class WC_Payment_Subscription_Epayco_SE extends WC_Payment_Gateway
         $this->description  = $this->get_option( 'description' );
         $this->order_button_text = __('To subscribe', 'subscription-epayco');
         $this->has_fields = true;
-        $this->supports = array(
+        $this->supports = [
             'subscriptions',
-            'subscription_cancellation'
-        );
+            'subscription_cancellation',
+            'multiple_subscriptions'
+        ];
         $this->init_form_fields();
         $this->init_settings();
         $this->title = $this->get_option('title');
@@ -66,9 +67,8 @@ class WC_Payment_Subscription_Epayco_SE extends WC_Payment_Gateway
 
     public function payment_fields()
     {
-        if ( $description = $this->get_description() ) {
+        if ( $description = $this->get_description() )
             echo wp_kses_post( wpautop( wptexturize( $description ) ) );
-        }
 
         ?>
         <div id="card-epayco-suscribir">
@@ -106,12 +106,12 @@ class WC_Payment_Subscription_Epayco_SE extends WC_Payment_Gateway
         if($data['status']){
             wc_reduce_stock_levels($order_id);
             WC()->cart->empty_cart();
-            return array(
+            return [
                 'result' => 'success',
                 'redirect' => $data['url']
-            );
+            ];
         }else{
-            wc_add_notice($data['message'], 'error' );
+            wc_add_notice(implode("</br>", $data['message']), 'error' );
         }
 
         return parent::process_payment($order_id);
@@ -133,9 +133,7 @@ class WC_Payment_Subscription_Epayco_SE extends WC_Payment_Gateway
         if (!$enable)
         {
             if (isset($availableGateways[$this->id]))
-            {
                 unset($availableGateways[$this->id]);
-            }
         }
         return $availableGateways;
     }

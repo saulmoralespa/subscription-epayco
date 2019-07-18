@@ -5,7 +5,7 @@ Tags: commerce, e-commerce, commerce, wordpress ecommerce, store, sales, sell, s
 Requires at least: 5.0
 Tested up to: 5.1
 Requires PHP: 5.6.0
-Stable tag: 1.0.8
+Stable tag: 2.0.0
 License: GNU General Public License v3.0
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -35,7 +35,7 @@ Colombia
 
 = Are you required to use a ssl certificate ? =
 
-Si. But it is advisable that you consider using it since it is revealing for browsers
+Yes. But it is advisable that you consider using it since it is revealing for browsers
 
 = What else should I keep in mind, that you have not told me ? =
 
@@ -45,9 +45,14 @@ Si. But it is advisable that you consider using it since it is revealing for bro
 
 **You can not change the price, interval and period of the subscription product once you have created it and you would have made at least the first subscription by a user**
 
+= How enable multiple subscriptions ? =
+
+Enter Woocommerce/settings/Subscriptions enable "Manual Renewal Payments"
+
 == Screenshots ==
 
 1. Half payment configuration corresponds to screenshot-1.png
+1. Enable multiple subscriptions screenshot-2.png
 
 == Changelog ==
 
@@ -67,6 +72,8 @@ Si. But it is advisable that you consider using it since it is revealing for bro
 * Added address parameters
 = 1.0.8 =
 * Added cell_phone parameter
+= 2.0.0 =
+* Added multiple subscriptions
 
 == Additional Info ==
 **Contribute** [repository on github](https://github.com/saulmoralespa/subscription-epayco)

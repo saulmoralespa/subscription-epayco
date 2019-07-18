@@ -28,6 +28,21 @@ jQuery( function( $ ) {
             let card_expire = checkout_form.find('#subscriptionepayco_expiry').val();
             let card_cvv = checkout_form.find('#subscriptionepayco_cvc').val();
 
+
+            card_expire = card_expire.replace(/ /g, '');
+            card_expire = card_expire.split('/');
+            let month = card_expire[0];
+            if (month.length === 1) month = `0${month}`;
+
+            let date = new Date();
+            let year = date.getFullYear();
+            year = year.toString();
+            let lenYear = year.substr(0, 2);
+
+            let yearEnd = card_expire[1].length === 4 ? card_expire[1]  : lenYear + card_expire[1].substr(-2);
+
+            card_expire = `${month}/${yearEnd}`;
+
             checkout_form.append($('<input name="subscriptionepayco_number" type="hidden" />' ).val( number_card ));
             checkout_form.append($('<input name="subscriptionepayco_name" type="hidden" />' ).val( card_holder ));
             checkout_form.append($('<input name="subscriptionepayco_expiry" type="hidden" />' ).val( card_expire ));
@@ -42,11 +57,13 @@ jQuery( function( $ ) {
 
 
             if (!number_card || !card_holder || !card_expire || !card_cvv){
-                checkout_form.append(`<input type="hidden" name="subscriptionepayco_errorcard" value="${subscription_epayco.msjEmptyInputs}">`);
+                checkout_form.append(`<input type="hidden" name="subscriptionepayco_errorcard" value="${subscription_epayco.msgEmptyInputs}">`);
             }else if (!checkCard()){
-                checkout_form.append(`<input type="hidden" name="subscriptionepayco_errorcard" value="${subscription_epayco.msjNoCard}">`);
+                checkout_form.append(`<input type="hidden" name="subscriptionepayco_errorcard" value="${subscription_epayco.msgNoCard}">`);
             }else if(!valid_credit_card(number_card)){
-                checkout_form.append(`<input type="hidden" name="subscriptionepayco_errorcard" value="${subscription_epayco.msjNoCardValidate}">`);
+                checkout_form.append(`<input type="hidden" name="subscriptionepayco_errorcard" value="${subscription_epayco.msgNoCardValidate}">`);
+            }else if (!validateDate(yearEnd, month)){
+                checkout_form.append(`<input type="hidden" name="subscriptionepayco_errorcard" value="${subscription_epayco.msgValidateDate}">`);
             }
 
             swal.fire({
@@ -110,6 +127,15 @@ jQuery( function( $ ) {
         }
 
         return (nCheck % 10) === 0;
+    }
+
+    function validateDate(yearEnd, month){
+
+        let date = new Date();
+        let currentMonth = ("0" + (date.getMonth() + 1)).slice(-2);
+        let year = date.getFullYear();
+
+        return (parseInt(yearEnd) > year) || (parseInt(yearEnd) === year && month >= currentMonth);
     }
 
 });

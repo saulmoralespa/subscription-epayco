@@ -71,7 +71,7 @@ return array(
     ),
     'privateKey' => array(
         'title' => __('PRIVATE_KEY'),
-        'type' => 'text',
+        'type' => 'password',
         'description' => __('La encuentra en el panel de ePayco, integraciones, Llaves API'),
         'default' => '',
         'desc_tip' => true,

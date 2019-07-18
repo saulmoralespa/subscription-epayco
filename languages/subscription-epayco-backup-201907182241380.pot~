@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Subscription ePayco\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-07-18 22:41+0000\n"
+"POT-Creation-Date: 2019-04-25 15:15+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: \n"
@@ -15,14 +15,19 @@ msgstr ""
 "X-Generator: Loco https://localise.biz/\n"
 "X-Loco-Version: 2.2.1; wp-5.1.1"
 
-#: includes/class-subscription-epayco.php:53
+#: includes/class-subscription-epayco.php:49
 msgid "An internal error has arisen, try again"
 msgstr ""
 
-#: includes/class-subscription-epayco.php:400
-#: includes/class-gateway-subscription-epayco.php:189
+#: includes/class-subscription-epayco.php:86
 #, php-format
 msgid "Successful subscription (subscription ID: %s), reference (%s)"
+msgstr ""
+
+#: includes/class-subscription-epayco.php:281
+msgid ""
+"Currently Subscription ePayco does not support more than one product in the "
+"cart if one of the products is a subscription."
 msgstr ""
 
 #: includes/class-subscription-epayco-plugin.php:112
@@ -34,52 +39,48 @@ msgctxt "placeholder"
 msgid ""
 msgstr ""
 
-#: includes/class-subscription-epayco-plugin.php:131
+#: includes/class-subscription-epayco-plugin.php:129
 msgid "DNI"
 msgstr ""
 
-#: includes/class-subscription-epayco-plugin.php:132
+#: includes/class-subscription-epayco-plugin.php:130
 msgctxt "placeholder"
 msgid "Your DNI here...."
 msgstr ""
 
-#: includes/class-subscription-epayco-plugin.php:150
+#: includes/class-subscription-epayco-plugin.php:151
 msgid "The type of card is not accepted"
 msgstr ""
 
-#: includes/class-subscription-epayco-plugin.php:151
+#: includes/class-subscription-epayco-plugin.php:152
 msgid "Enter the card information"
 msgstr ""
 
-#: includes/class-subscription-epayco-plugin.php:152
+#: includes/class-subscription-epayco-plugin.php:153
 msgid "Please wait..."
 msgstr ""
 
-#: includes/class-subscription-epayco-plugin.php:153
+#: includes/class-subscription-epayco-plugin.php:154
 msgid "Redirecting to verify status..."
 msgstr ""
 
-#: includes/class-subscription-epayco-plugin.php:154
-msgid "Card number, invalid"
-msgstr ""
-
 #: includes/class-subscription-epayco-plugin.php:155
-msgid "Invalid card expiration date"
+msgid "Card number, invalid"
 msgstr ""
 
 #: includes/class-gateway-subscription-epayco.php:18
 msgid "To subscribe"
 msgstr ""
 
-#: includes/class-gateway-subscription-epayco.php:77
+#: includes/class-gateway-subscription-epayco.php:75
 msgid "Data of card"
 msgstr ""
 
-#: includes/class-gateway-subscription-epayco.php:78
+#: includes/class-gateway-subscription-epayco.php:76
 msgid "Card number"
 msgstr ""
 
-#: includes/class-gateway-subscription-epayco.php:79
+#: includes/class-gateway-subscription-epayco.php:77
 msgid "Cardholder"
 msgstr ""
 

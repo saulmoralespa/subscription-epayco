@@ -19,21 +19,18 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
         $lang = $lang[0];
 
         $this->epayco = new Epayco\Epayco(
-            array(
+            [
                 "apiKey" => $this->apiKey,
                 "privateKey" => $this->privateKey,
                 "lenguage" => strtoupper($lang),
                 "test" => $this->isTest
-            )
+            ]
         );
 
     }
 
-    public function subscription_epayco($params)
+    public function subscription_epayco(array $params)
     {
-        global $wpdb;
-        $table_subscription_epayco = $wpdb->prefix . 'subscription_epayco';
-
         $order_id = $params['id_order'];
         $order = new WC_Order($order_id);
 
@@ -41,85 +38,50 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
 
         $token = $this->tokenCreate($card);
 
-        $subscription = $this->getWooCommerceSubscriptionFromOrderId($order_id);
+        $subscriptions = $this->getWooCommerceSubscriptionFromOrderId($order_id);
 
-        $customerData = $this->paramsBilling($subscription);
+        $customerData = $this->paramsBilling($subscriptions);
 
         $customerData['token_card'] = $token->data->id;
 
         $customer = $this->customerCreate($customerData);
 
-        $response_status = array('status' => false, 'message' => __('An internal error has arisen, try again', 'subscription-epayco'));
+        $customerData['customer_id'] = $customer->data->customerId;
+
+        $response_status = [
+            'status' => false,
+            'message' => __('An internal error has arisen, try again', 'subscription-epayco')
+        ];
 
         if (!$customer)
             return $response_status;
 
-        $product = $this->getProductFromOrder($order);
+        $plans = $this->getPlansBySubscription($subscriptions);
 
-        $plan = $this->getPlanByProduct($product, $order);
 
-        $planCreate = array_merge(
-            $plan, $this->getTrialDays($subscription),
-            array(
-                "interval" => $subscription->get_billing_period(),
-                "amount" => WC_Subscriptions_Order::get_recurring_total( $order ),
-                "interval_count" => $subscription->get_billing_interval()
+        $getPlans = $this->getPlans($plans);
+        if (!empty($getPlans))
+            $this->plansCreate($getPlans);
 
-            )
-        );
+        $this->subscriptionCreate($plans, $customerData);
 
-        $getPlan = $this->getPlan($planCreate['id_plan']);
-        if (!$getPlan->status)
-            $this->planCreate($planCreate);
-
-        $subscriptionCreate = array(
-            "id_plan" => $planCreate['id_plan'],
-            "customer" => $customer->data->customerId,
-            "token_card" => $token->data->id,
-            "doc_number" => get_post_meta( $subscription->get_id(), '_billing_dni', true ),
-            "type_document" => get_post_meta( $subscription->get_id(), '_billing_type_document', true )
-        );
-
-        $this->subscriptionCreate($subscriptionCreate);
-
-        $sub = $this->subscriptionCharge($subscriptionCreate);
+        $subs = $this->subscriptionCharge($plans, $customerData);
 
         if($this->debug === 'yes')
-            subscription_epayco_se()->log(print_r($sub, true));
+            subscription_epayco_se()->log($subs);
 
+        $messageStatus = $this->handleStatusSubscriptions($subs, $subscriptions, $customerData);
 
-        if(isset($sub->data->status) && $sub->data->status === 'error')
-            return array('status' => false, 'message' =>  $sub->data->description);
-
-        if ($sub->data->cod_respuesta === 2 || $sub->data->cod_respuesta === 4)
-            return array('status' => false, 'message' =>  "{$sub->data->estado}: {$sub->data->respuesta}");
-
-        if ($sub->data->cod_respuesta === 1){
-            $order->payment_complete();
-            $note  = sprintf(__('Successful subscription (subscription ID: %s), reference (%s)', 'subscription-epayco'),
-                $sub->subscription->_id, $sub->data->ref_payco);
-            $subscription->add_order_note($note);
-        }else{
-            $order->update_status('pending');
-            $wpdb->insert(
-                $table_subscription_epayco,
-                array(
-                    'order_id' => $subscription->get_id(),
-                    'ref_payco' => $sub->data->ref_payco
-                )
-            );
-
-        }
-
-        update_post_meta($subscription->get_id(), 'id_client', $customer->data->customerId);
-
-        $response_status = array('status' => true, 'url' => $order->get_checkout_order_received_url());
+        $response_status = ['status' => $messageStatus['status'],
+            'message' => $messageStatus['message'],
+            'url' => $order->get_checkout_order_received_url()
+        ];
 
         return $response_status;
 
     }
 
-    public function tokenCreate($data)
+    public function tokenCreate(array $data)
     {
         $token = false;
 
@@ -139,7 +101,7 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
         return $token;
     }
 
-    public function customerCreate($data)
+    public function customerCreate(array $data)
     {
         $customer = false;
 
@@ -164,85 +126,86 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
         return $customer;
     }
 
-    public function getPlan($id)
+    public function getPlans(array $plans)
     {
-        $plan = false;
-
-        try{
-            $plan = $this->epayco->plan->get($id);
-        }catch (Exception $exception){
-            subscription_epayco_se()->log($exception->getMessage());
+        foreach ($plans as $plan){
+            try{
+                $this->epayco->plan->get($plans[$plan]['id_plan']);
+                unset($plans[$plan]);
+            }catch (Exception $exception){
+                subscription_epayco_se()->log($exception->getMessage());
+            }
         }
 
-        return $plan;
+        return $plans;
     }
 
-    public function planCreate($data)
+    public function plansCreate(array $plans)
     {
-        $plan = false;
 
-        try{
-            $plan = $this->epayco->plan->create(
-                array(
-                "id_plan" => $data['id_plan'],
-                "name" => $data['name'],
-                "description" => $data['description'],
-                "amount" => $data['amount'],
-                "currency" => $data['currency'],
-                "interval" => $data['interval'],
-                "interval_count" => $data['interval_count'],
-                "trial_days" => $data['trial_days']
-            )
-            );
-        }catch (Exception $exception){
-            subscription_epayco_se()->log($exception->getMessage());
+        foreach ($plans as $plan){
+            try{
+                $this->epayco->plan->create(
+                    [
+                        "id_plan" => $plan['id_plan'],
+                        "name" => $plan['name'],
+                        "description" => $plan['description'],
+                        "amount" => $plan['amount'],
+                        "currency" => $plan['currency'],
+                        "interval" => $plan['interval'],
+                        "interval_count" => $plan['interval_count'],
+                        "trial_days" => $plan['trial_days']
+                    ]
+                );
+            }catch (Exception $exception){
+                subscription_epayco_se()->log($exception->getMessage());
+            }
         }
-
-        return $plan;
     }
 
-    public function subscriptionCreate($data)
+    public function subscriptionCreate(array $plans, array  $customer)
     {
-        $sub = false;
 
-        try{
-            $sub = $this->epayco->subscriptions->create(
-                array(
-                "id_plan" => $data['id_plan'],
-                "customer" => $data['customer'],
-                "token_card" => $data['token_card'],
-                "doc_type" => $data['type_document'],
-                "doc_number" => $data['doc_number']
-            )
-            );
-        }catch (Exception $exception){
-            subscription_epayco_se()->log($exception->getMessage());
+        foreach ($plans as $plan){
+            try{
+                $this->epayco->subscriptions->create(
+                    [
+                        "id_plan" => $plan['id_plan'],
+                        "customer" => $customer['customer_id'],
+                        "token_card" => $customer['token_card'],
+                        "doc_type" => $customer['type_document'],
+                        "doc_number" => $customer['doc_number']
+                    ]
+                );
+            }catch (Exception $exception){
+                subscription_epayco_se()->log($exception->getMessage());
+            }
         }
-
-        return $sub;
     }
 
-    public function subscriptionCharge($data)
+    public function subscriptionCharge(array $plans, array $customer)
     {
-        $sub = false;
+        $subs = [];
 
-        try{
-            $sub = $this->epayco->subscriptions->charge(
-                array(
-                    "id_plan" => $data['id_plan'],
-                    "customer" => $data['customer'],
-                    "token_card" => $data['token_card'],
-                    "doc_type" => $data['type_document'],
-                    "doc_number" => $data['doc_number'],
-                    "ip" => $this->getIP(),
-                    "url_confirmation" => $this->getUrlNotify()
-                )
-            );
-        }catch (Exception $exception){
-            subscription_epayco_se()->log($exception->getMessage());
+        foreach ($plans as $plan){
+            try{
+                $subs[] = $this->epayco->subscriptions->charge(
+                    [
+                        "id_plan" => $plan['id_plan'],
+                        "customer" => $customer['customer_id'],
+                        "token_card" => $customer['token_card'],
+                        "doc_type" => $customer['type_document'],
+                        "doc_number" => $customer['doc_number'],
+                        "ip" => $this->getIP(),
+                        "url_confirmation" => $this->getUrlNotify()
+                    ]
+                );
+            }catch (Exception $exception){
+                subscription_epayco_se()->log($exception->getMessage());
+            }
         }
 
-        return $sub;
+        return $subs;
     }
 
     public function cancelSubscription($idClient)
@@ -257,36 +220,32 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
     private function getWooCommerceSubscriptionFromOrderId($orderId)
     {
         $subscriptions = wcs_get_subscriptions_for_order($orderId);
-        return end($subscriptions);
+
+        return $subscriptions;
     }
 
-    public function prepareDataCard($params)
+    public function prepareDataCard(array $params)
     {
-        $data = array();
+        $data = [];
 
         $card_number = $params['subscriptionepayco_number'];
         $data['card_number'] = str_replace(' ','', $card_number);
-        $card_expire = $params['subscriptionepayco_expiry'];
+        $card_expire = explode('/', $params['subscriptionepayco_expiry']);
         $data['cvc'] = $params['subscriptionepayco_cvc'];
 
 
-        $year = date('Y');
-        $lenyear = substr($year, 0,2);
-        $expires = str_replace(' ', '', $card_expire);
-        $expire = explode('/', $expires);
-        $month = $expire[0];
-        if (strlen($month) == 1) $month = '0' . $month;
-        $yearEnd =  strlen($expire[1]) == 4 ? $expire[1] :  $lenyear . substr($expire[1], -2);
-        $data['card_expire_year'] = $yearEnd;
-        $data['card_expire_month'] = $month;
+        $data['card_expire_year'] = $card_expire[1];
+        $data['card_expire_month'] = $card_expire[0];
 
         return $data;
 
     }
 
-    public function paramsBilling($subscription)
+    public function paramsBilling($subscriptions)
     {
         $data = [];
+
+        $subscription = end($subscriptions);
 
         $data['name'] =  $subscription->get_shipping_first_name() ? $subscription->get_shipping_first_name() : $subscription->get_billing_first_name();
         $data['last_name'] = $subscription->get_shipping_last_name() ? $subscription->get_shipping_last_name() : $subscription->get_billing_last_name();
@@ -295,54 +254,94 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
         $data['country'] = $subscription->get_shipping_country() ? $subscription->get_shipping_country() : $subscription->get_billing_country();
         $data['city'] = $subscription->get_shipping_city() ? $subscription->get_shipping_city() : $subscription->get_billing_city();
         $data['address'] = $subscription->get_shipping_address_1() ? $subscription->get_shipping_address_1() . " " . $subscription->get_shipping_address_2() : $subscription->get_billing_address_1() . " " . $subscription->get_billing_address_2();
+        $data['doc_number'] = get_post_meta( $subscription->get_id(), '_billing_dni', true );
+        $data['type_document'] = get_post_meta( $subscription->get_id(), '_billing_type_document', true );
 
         return $data;
     }
 
-    public function getProductFromOrder($order)
+    public function getPlansBySubscription(array $subscriptions)
     {
-        $products = $order->get_items();
-        $count = $order->get_item_count();
-        if ($count > 1)
-        {
-            wc_add_notice(__('Currently Subscription ePayco does not support more than one product in the cart if one of the products is a subscription.', 'subscription-epayco'), 'error');
+
+        $plans = [];
+
+        foreach ($subscriptions as $key => $subscription){
+
+            $total_discount = $subscription->get_total_discount();
+            $order_currency = $subscription->get_currency();
+
+            $products = $subscription->get_items();
+
+            $product_plan = $this->getPlan($products);
+
+            $quantity =  $product_plan['quantity'];
+            $product_name = $product_plan['name'];
+            $product_id = $product_plan['id'];
+
+            $plan_code = "$product_name-$product_id";
+            $plan_code = $this->currency !== $order_currency ? "$plan_code-$order_currency" : $plan_code;
+            $plan_code = $quantity > 1 ? "$plan_code-$quantity" : $plan_code;
+            $plan_code = $total_discount > 0 ? "$plan_code-$total_discount" : $plan_code;
+            $plan_code = rtrim($plan_code, "-");
+
+
+            $plans[] = array_merge(
+                [
+                    "id_plan" => $plan_code,
+                    "name" => "Plan $plan_code",
+                    "description" => "Plan $plan_code",
+                    "currency" => $order_currency,
+                ],
+                $this->getTrialDays($subscription),
+                $this->intervalAmount($subscription)
+            );
         }
-        return array_values($products)[0];
+
+        return $plans;
     }
 
-    public function getPlanByProduct($product, $order)
+    public function getPlan($products)
     {
+        $product_plan = [];
 
-        $order_currency = $order->get_currency();
-        $total_discount = $order->get_total_discount();
+        $product_plan['name'] = '';
+        $product_plan['id'] = 0;
+        $product_plan['quantity'] = 0;
 
-        $product_name = $product['name'];
-        $produt_name = $this->cleanCharacters($product_name);
-        $product_id = $product['product_id'];
-        $quantity =  $product['quantity'];
-        $plan_code = "$produt_name-$product_id";
-        $plan_code = $this->currency !== $order_currency ? "$plan_code-$order_currency" : $plan_code;
-        $plan_code = $quantity > 1 ? "$plan_code-$quantity" : "$plan_code";
-        $plan_code = $total_discount > 0 ? "$plan_code-$total_discount" : $plan_code;
-        return array(
-            "id_plan" => $plan_code,
-            "name" => "Plan $plan_code",
-            "description" => "Plan $plan_code",
-            "currency" => $order_currency
-        );
+        foreach ($products as $product){
+            $product_plan['name'] .= "{$product['name']}-";
+            $product_plan['id'] .= "{$product['product_id']}-";
+            $product_plan['quantity'] .=  $product['quantity'];
+        }
+
+        $product_plan['name'] = $this->cleanCharacters($product_plan['name']);
+
+        return $product_plan;
     }
 
-    public function getTrialDays($subscription)
+    public function intervalAmount(WC_Subscription $subscription)
     {
+        return  [
+            "interval" => $subscription->get_billing_period(),
+            "amount" => $subscription->get_total(),
+            "interval_count" => $subscription->get_billing_interval()
+        ];
+    }
+
+    public function getTrialDays(WC_Subscription $subscription)
+    {
+
+        $trial_days = "0";
+
         $trial_start = $subscription->get_date('start');
         $trial_end = $subscription->get_date('trial_end');
-        $trial_days = "0";
-        if ($trial_end > 0 ){
+
+        if ($trial_end > 0 )
             $trial_days = (string)(strtotime($trial_end) - strtotime($trial_start)) / (60 * 60 * 24);
-        }
-        return array(
-            'trial_days' => $trial_days
-        );
+
+        return [
+            "trial_days" => $trial_days
+        ];
     }
 
     public function cleanCharacters($string)
@@ -363,5 +362,58 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
         return ($_SERVER['REMOTE_ADDR'] == '::1' || $_SERVER['REMOTE_ADDR'] == '::' ||
             !preg_match('/^((?:25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9]).){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])$/m',
                 $_SERVER['REMOTE_ADDR'])) ? '127.0.0.1' : $_SERVER['REMOTE_ADDR'];
+    }
+
+    public function handleStatusSubscriptions(array $subscriptionsStatus, array $subscriptions, array $customer)
+    {
+
+        global $wpdb;
+        $table_subscription_epayco = $wpdb->prefix . 'subscription_epayco';
+
+        $count = 0;
+        $messageStatus = [];
+        $messageStatus['status'] = true;
+        $messageStatus['message'] = [];
+
+        $quantitySubscriptions = count($subscriptionsStatus);
+
+        foreach ($subscriptions as $subscription){
+
+            $sub = $subscriptionsStatus[$count];
+
+            if(isset($sub->data->status) && $sub->data->status === 'error')
+                $messageStatus['message'] = array_merge($messageStatus['message'], [ $sub->data->description ]);
+
+            if ($sub->data->cod_respuesta === 2 || $sub->data->cod_respuesta === 4)
+                $messageStatus['message'] = array_merge($messageStatus['message'], [ "{$sub->data->estado}: {$sub->data->respuesta}" ]);
+
+
+            if ($sub->data->cod_respuesta === 1){
+                $subscription->payment_complete();
+                $note  = sprintf(__('Successful subscription (subscription ID: %s), reference (%s)', 'subscription-epayco'),
+                    $sub->subscription->_id, $sub->data->ref_payco);
+                $subscription->add_order_note($note);
+            }elseif ($sub->data->cod_respuesta === 3){
+                $subscription->update_status('pending');
+                $wpdb->insert(
+                    $table_subscription_epayco,
+                    [
+                        'order_id' => $subscription->get_id(),
+                        'ref_payco' => $sub->data->ref_payco
+                    ]
+                );
+
+            }
+
+            $count++;
+
+            if ($count === $quantitySubscriptions && count($messageStatus['message']) >= $count)
+                $messageStatus['status'] = false;
+
+            update_post_meta($subscription->get_id(), 'id_client', $customer['customer_id']);
+        }
+
+        return $messageStatus;
+
     }
 }
