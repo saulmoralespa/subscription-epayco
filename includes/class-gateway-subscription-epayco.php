@@ -121,10 +121,10 @@ class WC_Payment_Subscription_Epayco_SE extends WC_Payment_Gateway
     public function subscription_cancelled($subscription)
     {
         $id = $subscription->get_id();
-        $idClient = get_post_meta( $id, 'id_client', true );
+        $subscription_id = get_post_meta( $id, 'subscription_id', true );
 
         $subscription = new Subscription_Epayco_SE();
-        $subscription->cancelSubscription($idClient);
+        $subscription->cancelSubscription($subscription_id);
     }
 
     public function disable_non_subscription($availableGateways)
@@ -189,6 +189,7 @@ class WC_Payment_Subscription_Epayco_SE extends WC_Payment_Gateway
             $note  = sprintf(__('Successful subscription (subscription ID: %s), reference (%s)', 'subscription-epayco'),
                 $subscription_id, $x_ref_payco);
             $subscription->add_order_note($note);
+            update_post_meta($subscription->get_id(), 'subscription_id', $subscription_id);
         }else{
             $subscription->payment_failed();
         }

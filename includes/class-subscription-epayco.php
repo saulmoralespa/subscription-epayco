@@ -58,8 +58,8 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
 
         $plans = $this->getPlansBySubscription($subscriptions);
 
-
         $getPlans = $this->getPlans($plans);
+
         if (!empty($getPlans))
             $this->plansCreate($getPlans);
 
@@ -128,10 +128,13 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
 
     public function getPlans(array $plans)
     {
-        foreach ($plans as $plan){
+
+        foreach ($plans as $key => $plan){
             try{
-                $this->epayco->plan->get($plans[$plan]['id_plan']);
-                unset($plans[$plan]);
+                $plan = $this->epayco->plan->get($plans[$key]['id_plan']);
+
+                if ($plan->status)
+                    unset($plans[$key]);
             }catch (Exception $exception){
                 subscription_epayco_se()->log($exception->getMessage());
             }
@@ -208,10 +211,10 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
         return $subs;
     }
 
-    public function cancelSubscription($idClient)
+    public function cancelSubscription($subscription_id)
     {
         try{
-            $this->epayco->subscriptions->cancel($idClient);
+            $this->epayco->subscriptions->cancel($subscription_id);
         }catch (Exception $exception){
             subscription_epayco_se()->log($exception->getMessage());
         }
@@ -393,6 +396,7 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
                 $note  = sprintf(__('Successful subscription (subscription ID: %s), reference (%s)', 'subscription-epayco'),
                     $sub->subscription->_id, $sub->data->ref_payco);
                 $subscription->add_order_note($note);
+                update_post_meta($subscription->get_id(), 'subscription_id', $sub->subscription->_id);
             }elseif ($sub->data->cod_respuesta === 3){
                 $subscription->update_status('pending');
                 $wpdb->insert(
