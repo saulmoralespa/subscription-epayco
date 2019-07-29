@@ -5,7 +5,7 @@ Tags: commerce, e-commerce, commerce, wordpress ecommerce, store, sales, sell, s
 Requires at least: 5.0
 Tested up to: 5.2
 Requires PHP: 5.6.0
-Stable tag: 2.0.2
+Stable tag: 2.0.3
 License: GNU General Public License v3.0
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -78,6 +78,8 @@ Enter Woocommerce/settings/Subscriptions enable "Manual Renewal Payments"
 * Fixed access array multiple
 = 2.0.2 =
 * Fixed subscription cancel
+= 2.0.3 =
+* Fixed user ip
 
 == Additional Info ==
 **Contribute** [repository on github](https://github.com/saulmoralespa/subscription-epayco)

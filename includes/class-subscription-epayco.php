@@ -260,6 +260,8 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
         $data['doc_number'] = get_post_meta( $subscription->get_id(), '_billing_dni', true );
         $data['type_document'] = get_post_meta( $subscription->get_id(), '_billing_type_document', true );
 
+        subscription_epayco_se()->log($data);
+
         return $data;
     }
 
@@ -362,9 +364,12 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
 
     public function getIP()
     {
-        return ($_SERVER['REMOTE_ADDR'] == '::1' || $_SERVER['REMOTE_ADDR'] == '::' ||
+        $ip = isset($_SERVER['HTTP_CLIENT_IP']) ? $_SERVER['HTTP_CLIENT_IP'] :
+            (isset($_SERVER['HTTP_X_FORWARDED_FOR']) ? $_SERVER['HTTP_X_FORWARDED_FOR'] : $_SERVER['REMOTE_ADDR']);
+
+        return ($ip == '::1' || $ip == '::' ||
             !preg_match('/^((?:25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9]).){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])$/m',
-                $_SERVER['REMOTE_ADDR'])) ? '127.0.0.1' : $_SERVER['REMOTE_ADDR'];
+                $ip)) ? '127.0.0.1' : $ip;
     }
 
     public function handleStatusSubscriptions(array $subscriptionsStatus, array $subscriptions, array $customer)
