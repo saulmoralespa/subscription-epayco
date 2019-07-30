@@ -199,6 +199,7 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
                         "token_card" => $customer['token_card'],
                         "doc_type" => $customer['type_document'],
                         "doc_number" => $customer['doc_number'],
+                        "ip" => $this->getIP(),
                         "url_confirmation" => $this->getUrlNotify()
                     ]
                 );
@@ -411,5 +412,25 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
 
         return $messageStatus;
 
+    }
+
+    public function getIP()
+    {
+        if (getenv('HTTP_CLIENT_IP'))
+            $ipaddress = getenv('HTTP_CLIENT_IP');
+        else if(getenv('HTTP_X_FORWARDED_FOR'))
+            $ipaddress = getenv('HTTP_X_FORWARDED_FOR');
+        else if(getenv('HTTP_X_FORWARDED'))
+            $ipaddress = getenv('HTTP_X_FORWARDED');
+        else if(getenv('HTTP_FORWARDED_FOR'))
+            $ipaddress = getenv('HTTP_FORWARDED_FOR');
+        else if(getenv('HTTP_FORWARDED'))
+            $ipaddress = getenv('HTTP_FORWARDED');
+        else if(getenv('REMOTE_ADDR'))
+            $ipaddress = getenv('REMOTE_ADDR');
+        else
+            $ipaddress = '127.0.0.1';
+
+        return $ipaddress;
     }
 }
