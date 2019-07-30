@@ -107,17 +107,17 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
 
         try{
             $customer = $this->epayco->customer->create(
-                array(
-                "token_card" => $data['token_card'],
-                "name" => $data['name'] . ' ' . $data['last_name'],
-                "email" => $data['email'],
-                "phone" => $data['phone'],
-                "cell_phone" => $data['phone'],
-                "country" =>  $data['country'],
-                "city" => $data['city'],
-                "address" => $data['address'],
-                "default" => true
-            )
+                [
+                    "token_card" => $data['token_card'],
+                    "name" => $data['name'] . ' ' . $data['last_name'],
+                    "email" => $data['email'],
+                    "phone" => $data['phone'],
+                    "cell_phone" => $data['phone'],
+                    "country" =>  $data['country'],
+                    "city" => $data['city'],
+                    "address" => $data['address'],
+                    "default" => true
+                ]
             );
         }catch (Exception $exception){
             subscription_epayco_se()->log($exception->getMessage());
@@ -199,10 +199,10 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
                         "token_card" => $customer['token_card'],
                         "doc_type" => $customer['type_document'],
                         "doc_number" => $customer['doc_number'],
-                        "ip" => $this->getIP(),
                         "url_confirmation" => $this->getUrlNotify()
                     ]
                 );
+
             }catch (Exception $exception){
                 subscription_epayco_se()->log($exception->getMessage());
             }
@@ -260,8 +260,6 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
         $data['doc_number'] = get_post_meta( $subscription->get_id(), '_billing_dni', true );
         $data['type_document'] = get_post_meta( $subscription->get_id(), '_billing_type_document', true );
 
-        subscription_epayco_se()->log($data);
-
         return $data;
     }
 
@@ -288,7 +286,6 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
             $plan_code = $quantity > 1 ? "$plan_code-$quantity" : $plan_code;
             $plan_code = $total_discount > 0 ? "$plan_code-$total_discount" : $plan_code;
             $plan_code = rtrim($plan_code, "-");
-
 
             $plans[] = array_merge(
                 [
@@ -360,16 +357,6 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
     {
         $url = trailingslashit(get_bloginfo( 'url' )) . trailingslashit('wc-api') . strtolower(get_parent_class($this));
         return $url;
-    }
-
-    public function getIP()
-    {
-        $ip = isset($_SERVER['HTTP_CLIENT_IP']) ? $_SERVER['HTTP_CLIENT_IP'] :
-            (isset($_SERVER['HTTP_X_FORWARDED_FOR']) ? $_SERVER['HTTP_X_FORWARDED_FOR'] : $_SERVER['REMOTE_ADDR']);
-
-        return ($ip == '::1' || $ip == '::' ||
-            !preg_match('/^((?:25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9]).){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])$/m',
-                $ip)) ? '127.0.0.1' : $ip;
     }
 
     public function handleStatusSubscriptions(array $subscriptionsStatus, array $subscriptions, array $customer)
