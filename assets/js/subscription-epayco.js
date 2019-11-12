@@ -2,17 +2,18 @@ jQuery( function( $ ) {
     'use strict';
 
     const checkout_form = $( 'form.woocommerce-checkout' );
+    const form_subscription_epayco = '#form-epayco';
 
     $( 'body' ).on( 'updated_checkout', function() {
+        $('input[name="payment_method"]').change(function(){
+            loadCard();
+        }).change();
+    });
 
-        if (checkout_form.find('#form-epayco').is(":visible"))
-        {
-            new Card({
-                form: document.querySelector('#form-epayco'),
-                container: '.card-wrapper'
-            });
-        }
-
+    $("#wizard").on('onStepChanged', function (event, currentIndex, priorIndex) {
+        $('input[name="payment_method"]').change(function(){
+            loadCard();
+        }).change();
     });
 
     $(document.body).on('checkout_error', function () {
@@ -76,6 +77,15 @@ jQuery( function( $ ) {
         }
 
     });
+
+    function loadCard() {
+        if (checkout_form.find(form_subscription_epayco).is(":visible")){
+            new Card({
+                form: document.querySelector(form_subscription_epayco),
+                container: '.card-wrapper'
+            });
+        }
+    }
 
     function checkCard(){
         let countryCode = subscription_epayco.country;

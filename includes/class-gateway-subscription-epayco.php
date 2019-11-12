@@ -36,6 +36,7 @@ class WC_Payment_Subscription_Epayco_SE extends WC_Payment_Gateway
 
         add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
         add_action('woocommerce_subscription_status_cancelled', array($this, 'subscription_cancelled'));
+        add_action('woocommerce_scheduled_subscription_expiration', array($this, 'subscription_expiration'));
         add_action('woocommerce_available_payment_gateways', array($this, 'disable_non_subscription'), 20);
         add_action('woocommerce_api_'.strtolower(get_class($this)), array($this, 'confirmation_ipn'));
     }
@@ -127,6 +128,14 @@ class WC_Payment_Subscription_Epayco_SE extends WC_Payment_Gateway
         $subscription->cancelSubscription($subscription_id);
     }
 
+    public function subscription_expiration($id)
+    {
+        $subscription_id = get_post_meta( $id, 'subscription_id', true );
+
+        $subscription = new Subscription_Epayco_SE();
+        $subscription->cancelSubscription($subscription_id);
+    }
+
     public function disable_non_subscription($availableGateways)
     {
         $enable = WC_Subscriptions_Cart::cart_contains_subscription();
@@ -169,7 +178,9 @@ class WC_Payment_Subscription_Epayco_SE extends WC_Payment_Gateway
         $table_subscription_epayco = $wpdb->prefix . 'subscription_epayco';
         $x_cod_transaction_state = $data['x_cod_transaction_state'];
         $x_ref_payco = $data['x_ref_payco'];
-        $subscription_id = $data['x_extra1'];
+        $x_id_factura = $data['x_id_factura'];
+        $x_id_factura = explode('-', $x_id_factura);
+        $subscription_id = $x_id_factura[0];
         $query = "SELECT order_id FROM $table_subscription_epayco WHERE ref_payco='$x_ref_payco'";
         $query_delete = "DELETE FROM $table_subscription_epayco WHERE ref_payco='$x_ref_payco'";
 
@@ -191,6 +202,7 @@ class WC_Payment_Subscription_Epayco_SE extends WC_Payment_Gateway
             $subscription->add_order_note($note);
             update_post_meta($subscription->get_id(), 'subscription_id', $subscription_id);
         }else{
+            $this->subscription_cancelled($subscription_id);
             $subscription->payment_failed();
         }
 

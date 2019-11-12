@@ -42,9 +42,13 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
 
         $customerData = $this->paramsBilling($subscriptions);
 
+        subscription_epayco_se()->log($customerData);
+
         $customerData['token_card'] = $token->data->id;
 
         $customer = $this->customerCreate($customerData);
+
+        subscription_epayco_se()->log($customer);
 
         $customerData['customer_id'] = $customer->data->customerId;
 
@@ -380,17 +384,17 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
             if(isset($sub->data->status) && $sub->data->status === 'error')
                 $messageStatus['message'] = array_merge($messageStatus['message'], [ $sub->data->description ]);
 
-            if ($sub->data->cod_respuesta === 2 || $sub->data->cod_respuesta === 4)
+            if (isset($sub->data->cod_respuesta) && $sub->data->cod_respuesta === 2 || $sub->data->cod_respuesta === 4)
                 $messageStatus['message'] = array_merge($messageStatus['message'], [ "{$sub->data->estado}: {$sub->data->respuesta}" ]);
 
 
-            if ($sub->data->cod_respuesta === 1){
+            if (isset($sub->data->cod_respuesta) && $sub->data->cod_respuesta === 1){
                 $subscription->payment_complete();
                 $note  = sprintf(__('Successful subscription (subscription ID: %s), reference (%s)', 'subscription-epayco'),
                     $sub->subscription->_id, $sub->data->ref_payco);
                 $subscription->add_order_note($note);
                 update_post_meta($subscription->get_id(), 'subscription_id', $sub->subscription->_id);
-            }elseif ($sub->data->cod_respuesta === 3){
+            }elseif (isset($sub->data->cod_respuesta) && $sub->data->cod_respuesta === 3){
                 $subscription->update_status('pending');
                 $wpdb->insert(
                     $table_subscription_epayco,
