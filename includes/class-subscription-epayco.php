@@ -8,7 +8,7 @@
 
 class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
 {
-    private $epayco;
+    public $epayco;
 
     public function __construct()
     {

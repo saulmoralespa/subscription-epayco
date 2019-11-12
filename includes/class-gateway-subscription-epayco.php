@@ -37,6 +37,7 @@ class WC_Payment_Subscription_Epayco_SE extends WC_Payment_Gateway
         add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
         add_action('woocommerce_subscription_status_cancelled', array($this, 'subscription_cancelled'));
         add_action('woocommerce_scheduled_subscription_expiration', array($this, 'subscription_expiration'));
+        add_action('woocommerce_scheduled_subscription_payment', array($this, 'subscription_payment'));
         add_action('woocommerce_available_payment_gateways', array($this, 'disable_non_subscription'), 20);
         add_action('woocommerce_api_'.strtolower(get_class($this)), array($this, 'confirmation_ipn'));
     }
@@ -134,6 +135,34 @@ class WC_Payment_Subscription_Epayco_SE extends WC_Payment_Gateway
 
         $subscription = new Subscription_Epayco_SE();
         $subscription->cancelSubscription($subscription_id);
+    }
+
+    public function subscription_payment($id)
+    {
+        $subscription = new WC_Subscription($id);
+        $subscription_id = get_post_meta( $id, 'subscription_id', true);
+
+        $next_payment = $subscription->get_date('next_payment');
+        $nextPaymentTimestamp = strtotime($next_payment);
+
+        try{
+            $subscription_epayco = new Subscription_Epayco_SE();
+            $response = $subscription_epayco->epayco->subscriptions->getList();
+            $subscriptions = $response->data;
+
+            foreach ($subscriptions as $subscription){
+                $nextVerificationDateTimestamp = strtotime($subscription->nextVerificationDate);
+                if($subscription->_id === $subscription_id  && $subscription->status === 'active' && $nextVerificationDateTimestamp > $nextPaymentTimestamp){
+                        $subscription->payment_complete();
+                }elseif ($subscription->_id === $subscription_id  && $subscription->status === 'canceled' && $nextVerificationDateTimestamp > $nextPaymentTimestamp){
+                    $subscription->update_status('wc-cancelled');
+                }
+            }
+
+        }catch (Exception $exception){
+            subscription_epayco_se()->log($exception->getMessage());
+        }
+
     }
 
     public function disable_non_subscription($availableGateways)
