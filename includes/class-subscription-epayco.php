@@ -42,9 +42,9 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
 
         $customerData = $this->paramsBilling($subscriptions);
 
-        subscription_epayco_se()->log($customerData);
-
         $customerData['token_card'] = $token->data->id;
+
+        $customerData = array_merge($customerData, $card);
 
         $customer = $this->customerCreate($customerData);
 
@@ -113,7 +113,7 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
             $customer = $this->epayco->customer->create(
                 [
                     "token_card" => $data['token_card'],
-                    "name" => $data['name'] . ' ' . $data['last_name'],
+                    "name" => $data['card_holder_name'],
                     "email" => $data['email'],
                     "phone" => $data['phone'],
                     "cell_phone" => $data['phone'],
@@ -244,6 +244,7 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
 
         $data['card_expire_year'] = $card_expire[1];
         $data['card_expire_month'] = $card_expire[0];
+        $data['card_holder_name'] = $params['subscriptionepayco_name'];
 
         return $data;
 
@@ -255,8 +256,6 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
 
         $subscription = end($subscriptions);
 
-        $data['name'] =  $subscription->get_shipping_first_name() ? $subscription->get_shipping_first_name() : $subscription->get_billing_first_name();
-        $data['last_name'] = $subscription->get_shipping_last_name() ? $subscription->get_shipping_last_name() : $subscription->get_billing_last_name();
         $data['email'] = $subscription->get_billing_email();
         $data['phone'] = $subscription->get_billing_phone();
         $data['country'] = $subscription->get_shipping_country() ? $subscription->get_shipping_country() : $subscription->get_billing_country();
