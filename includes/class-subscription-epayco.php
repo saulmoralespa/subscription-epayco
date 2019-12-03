@@ -382,6 +382,8 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
 
             if(isset($sub->data->status) && $sub->data->status === 'error')
                 $messageStatus['message'] = array_merge($messageStatus['message'], [ $sub->data->description ]);
+            if(isset($sub->data->status) && $sub->data->status === 'error' && isset($sub->data->status->errors->errorMessage))
+                $messageStatus['message'] = array_merge($messageStatus['message'], [ $sub->data->status->errors->errorMessage ]);
 
             if (isset($sub->data->cod_respuesta) && $sub->data->cod_respuesta === 2 || $sub->data->cod_respuesta === 4)
                 $messageStatus['message'] = array_merge($messageStatus['message'], [ "{$sub->data->estado}: {$sub->data->respuesta}" ]);
