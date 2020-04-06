@@ -120,7 +120,7 @@ class WC_Payment_Subscription_Epayco_SE extends WC_Payment_Gateway
 
     }
 
-    public function subscription_cancelled($subscription)
+    public function subscription_cancelled(WC_Subscription $subscription)
     {
         $id = $subscription->get_id();
         $subscription_id = get_post_meta( $id, 'subscription_id', true );

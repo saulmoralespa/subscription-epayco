@@ -2,10 +2,10 @@
 Contributors: saulmorales
 Donate link: https://secure.payco.co/checkoutopen/10775
 Tags: commerce, e-commerce, commerce, wordpress ecommerce, store, sales, sell, shop, shopping, cart, checkout, configurable, epayco, subscription
-Requires at least: 5.0
-Tested up to: 5.3
+Requires at least: 5.3
+Tested up to: 5.4
 Requires PHP: 5.6.0
-Stable tag: 2.0.9
+Stable tag: 2.0.11
 License: GNU General Public License v3.0
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -94,6 +94,8 @@ Enter Woocommerce/settings/Subscriptions enable "Manual Renewal Payments"
 * Fixed cardHolder name
 = 2.0.10 =
 * Updated readme
+= 2.0.11 =
+* Updated wp compatible version
 
 == Additional Info ==
 **Contribute** [repository on github](https://github.com/saulmoralespa/subscription-epayco)

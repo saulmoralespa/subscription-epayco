@@ -2,21 +2,21 @@
 /*
 Plugin Name: Subscription ePayco
 Description: Cobros periódicos, suscripciones de ePayco
-Version: 2.0.10
+Version: 2.0.11
 Author: Saul Morales Pacheco
 Author URI: https://saulmoralespa.com
 License: GNU General Public License v3.0
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Text Domain: subscription-epayco
 Domain Path: /languages/
-WC tested up to: 3.6
-WC requires at least: 2.6
+WC tested up to: 4.0
+WC requires at least: 3.6
 */
 
 if (!defined( 'ABSPATH' )) exit;
 
 if(!defined('SUBSCRIPTION_EPAYCO_SE_VERSION')){
-    define('SUBSCRIPTION_EPAYCO_SE_VERSION', '2.0.10');
+    define('SUBSCRIPTION_EPAYCO_SE_VERSION', '2.0.11');
 }
 
 add_action('plugins_loaded','subscription_epayco_se_init',0);
@@ -47,18 +47,6 @@ function subscription_epayco_se_notices( $notice ) {
 }
 
 function requeriments_subscription_epayco_se(){
-
-    if ( version_compare( '5.6.0', PHP_VERSION, '>' ) ) {
-        if (is_admin() && !defined('DOING_AJAX')) {
-            add_action(
-                'admin_notices',
-                function() {
-                    subscription_epayco_se_notices( __('Subscription ePayco: Requiere la versión de php 5.6 o superior') );
-                }
-            );
-        }
-        return false;
-    }
 
     $openssl_warning = __( 'Subscription ePayco: Requiere OpenSSL >= 1.0.1 para instalarse en su servidor' );
 

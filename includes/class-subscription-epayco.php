@@ -48,8 +48,6 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
 
         $customer = $this->customerCreate($customerData);
 
-        subscription_epayco_se()->log($customer);
-
         $customerData['customer_id'] = $customer->data->customerId;
 
         $response_status = [
@@ -388,7 +386,6 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
             if (isset($sub->data->cod_respuesta) && $sub->data->cod_respuesta === 2 || $sub->data->cod_respuesta === 4)
                 $messageStatus['message'] = array_merge($messageStatus['message'], [ "{$sub->data->estado}: {$sub->data->respuesta}" ]);
 
-
             if (isset($sub->data->cod_respuesta) && $sub->data->cod_respuesta === 1){
                 $subscription->payment_complete();
                 $note  = sprintf(__('Successful subscription (subscription ID: %s), reference (%s)', 'subscription-epayco'),
@@ -405,6 +402,19 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
                     ]
                 );
 
+            }
+
+            if (isset($sub->data->cod_respuesta) &&
+                isset($sub->data->ref_payco) &&
+                ($sub->data->cod_respuesta === 3) ||
+                $sub->data->cod_respuesta !== 1){
+                $wpdb->insert(
+                    $table_subscription_epayco,
+                    [
+                        'order_id' => $subscription->get_id(),
+                        'ref_payco' => $sub->data->ref_payco
+                    ]
+                );
             }
 
             $count++;
