@@ -1,11 +1,6 @@
 input[type="tel"], input[type="text"] {
     display: block;
 }
-@media (min-width: 320px) and (max-width: 480px) {
-    .jp-card {
-        min-width: 270px!important;
-    }
-}
 
 .error-subscription-epayco {
     background-color: #ff0000;

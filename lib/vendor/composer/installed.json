@@ -6,12 +6,12 @@
         "source": {
             "type": "git",
             "url": "https://github.com/epayco/epayco-php.git",
-            "reference": "500a09a0e6889d651a94c45b9c81554ab3faf169"
+            "reference": "46ca9af7d800701d20c215f7eb48cfcad3d584b0"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/epayco/epayco-php/zipball/500a09a0e6889d651a94c45b9c81554ab3faf169",
-            "reference": "500a09a0e6889d651a94c45b9c81554ab3faf169",
+            "url": "https://api.github.com/repos/epayco/epayco-php/zipball/46ca9af7d800701d20c215f7eb48cfcad3d584b0",
+            "reference": "46ca9af7d800701d20c215f7eb48cfcad3d584b0",
             "shasum": ""
         },
         "require": {
@@ -21,7 +21,7 @@
         "require-dev": {
             "phpunit/phpunit": "^4.8.9"
         },
-        "time": "2020-03-13T16:32:08+00:00",
+        "time": "2020-11-24T20:20:53+00:00",
         "type": "sdk",
         "installation-source": "source",
         "autoload": {

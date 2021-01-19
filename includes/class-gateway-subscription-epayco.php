@@ -108,7 +108,7 @@ class WC_Payment_Subscription_Epayco_SE extends WC_Payment_Gateway
                 'redirect' => $data['url']
             ];
         }else{
-            wc_add_notice(implode("</br>", $data['message']), 'error' );
+            wc_add_notice(implode(PHP_EOL, $data['message']), 'error' );
         }
 
         return parent::process_payment($order_id);
