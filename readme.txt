@@ -1,11 +1,11 @@
 === Subscription ePayco  ===
 Contributors: saulmorales
-Donate link: https://secure.payco.co/checkoutopen/10775
-Tags: commerce, e-commerce, commerce, wordpress ecommerce, store, sales, sell, shop, shopping, cart, checkout, configurable, epayco, subscription
-Requires at least: 5.3
-Tested up to: 5.5
-Requires PHP: 5.6.0
-Stable tag: 3.0.1
+Donate link: https://saulmoralespa.com/donation
+Tags: commerce, e-commerce, commerce, WordPress ecommerce, store, sales, sell, shop, shopping, cart, checkout, configurable, epayco, subscription
+Requires at least: 6.0
+Tested up to: 6.4.3
+Requires PHP: 8.0
+Stable tag: 4.0.0
 License: GNU General Public License v3.0
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -43,7 +43,7 @@ Yes. But it is advisable that you consider using it since it is revealing for br
 
 = Why is not charging in the indicated interval ? =
 
-**You can not change the price, interval and period of the subscription product once you have created it and you would have made at least the first subscription by a user**
+**You can not change the price, interval and period of the subscription product once you have created it, and you would have made at least the first subscription by a user**
 
 = How enable multiple subscriptions ? =
 
@@ -104,9 +104,34 @@ Enter Woocommerce/settings/Subscriptions enable "Manual Renewal Payments"
 * Refactor on checkout_place_order
 = 3.0.1 =
 * Updated card and on checkout_error
+= 3.0.2 =
+* Updated wp compatible version
+= 3.0.3 =
+* Refactor method getPlansBySubscription "plan_code"
+= 3.0.4 =
+* Updated excepcions
+= 3.0.5 =
+* Updated subscription name and description
+= 3.0.6 =
+* Added allow new card token
+= 3.0.7 =
+* Fixed cancel subscription
+= 3.0.8 =
+* Fixed Renew subscription
+= 3.0.9 =
+* Added custom retry rule by year
+= 3.0.10 =
+* Updated wp compatible version
+= 3.0.11 =
+* Refactor name plan
+* Added check message tests
+= 4.0.0 =
+* Updated centered fields card
+* Updated allow manually renew
+* Updated compatible with php >= 8.1
 
 == Additional Info ==
 **Contribute** [repository on github](https://github.com/saulmoralespa/subscription-epayco)
 
 == Credits ==
-*  [Saul Morales Pacheco](https://saulmoralespa.com) [@saulmoralespa](http://twitter.com/saulmoralespa)
+*  [Saul Morales Pacheco](https://saulmoralespa.com) [Linkedin](https://www.linkedin.com/in/saulmoralespa/)

@@ -1,3 +1,8 @@
+div#card-epayco-suscribir #form-epayco {
+    display: flex;
+    flex-direction: column;
+}
+
 input[type="tel"], input[type="text"] {
     display: block;
 }

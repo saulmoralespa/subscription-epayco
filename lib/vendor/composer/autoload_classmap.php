@@ -6,4 +6,5 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
+    'Requests' => $vendorDir . '/rmccue/requests/library/Requests.php',
 );

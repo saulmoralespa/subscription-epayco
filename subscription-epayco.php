@@ -2,27 +2,35 @@
 /*
 Plugin Name: Subscription ePayco
 Description: Cobros periódicos, suscripciones de ePayco
-Version: 3.0.1
+Version: 4.0.0
 Author: Saul Morales Pacheco
 Author URI: https://saulmoralespa.com
 License: GNU General Public License v3.0
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Text Domain: subscription-epayco
 Domain Path: /languages/
-WC tested up to: 4.0
-WC requires at least: 3.6
+WC tested up to: 8.5
+WC requires at least: 4.0
 */
 
 if (!defined( 'ABSPATH' )) exit;
 
 if(!defined('SUBSCRIPTION_EPAYCO_SE_VERSION')){
-    define('SUBSCRIPTION_EPAYCO_SE_VERSION', '3.0.1');
+    define('SUBSCRIPTION_EPAYCO_SE_VERSION', '4.0.0');
 }
 
-add_action('plugins_loaded','subscription_epayco_se_init',0);
+add_action('plugins_loaded','subscription_epayco_se_init');
+add_action(
+    'before_woocommerce_init',
+    function () {
+        if ( class_exists( '\Automattic\WooCommerce\Utilities\FeaturesUtil' ) ) {
+            \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
+        }
+    }
+);
 
-
-function subscription_epayco_se_init(){
+function subscription_epayco_se_init(): void
+{
 
     load_plugin_textdomain('subscription-epayco', FALSE, dirname(plugin_basename(__FILE__)) . '/languages');
 
@@ -38,7 +46,8 @@ function subscription_epayco_se_init(){
 }
 
 
-function subscription_epayco_se_notices( $notice ) {
+function subscription_epayco_se_notices( $notice ): void
+{
     ?>
     <div class="error notice">
         <p><?php echo $notice; ?></p>
@@ -46,7 +55,8 @@ function subscription_epayco_se_notices( $notice ) {
     <?php
 }
 
-function requeriments_subscription_epayco_se(){
+function requeriments_subscription_epayco_se(): bool
+{
 
     $openssl_warning = __( 'Subscription ePayco: Requiere OpenSSL >= 1.0.1 para instalarse en su servidor' );
 
@@ -144,7 +154,8 @@ function subscription_epayco_se(){
     return $plugin;
 }
 
-function activate_subscription_epayco_se(){
+function activate_subscription_epayco_se(): void
+{
     global $wpdb;
 
     $table_subscription_epayco = $wpdb->prefix . 'subscription_epayco';

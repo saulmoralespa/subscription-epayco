@@ -6,5 +6,6 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
+    'WpOrg\\Requests\\' => array($vendorDir . '/rmccue/requests/src'),
     'Epayco\\' => array($vendorDir . '/epayco/epayco-php/src'),
 );
