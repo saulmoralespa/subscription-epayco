@@ -128,7 +128,7 @@ class Subscription_Epayco_SE_Plugin
                 'TI' => __('Tarjeta de identidad'),
                 'DNI' => __('Documento nacional de identificación')
             )
-        );                                                                                                                                                                                                                                                                      
+        );
 
         $fields['billing']['billing_dni'] = array(
             'label' => __('DNI', 'subscription-epayco'),

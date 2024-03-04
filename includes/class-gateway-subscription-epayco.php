@@ -49,6 +49,7 @@ class WC_Payment_Subscription_Epayco_SE extends WC_Payment_Gateway
         add_action('woocommerce_customer_changed_subscription_to_cancelled', array($this, 'subscription_cancelled'));
         add_action('woocommerce_scheduled_subscription_expiration', array($this, 'subscription_expiration'));
         add_action('woocommerce_scheduled_subscription_payment', array($this, 'subscription_payment'), 20, 1);
+        add_action('woocommerce_available_payment_gateways', array($this, 'disable_non_subscription'), 20);
         add_action('woocommerce_api_'.strtolower(get_class($this)), array($this, 'confirmation_ipn'));
     }
 
@@ -118,7 +119,7 @@ class WC_Payment_Subscription_Epayco_SE extends WC_Payment_Gateway
                 'redirect' => $data['url']
             ];
         }else{
-            $messages = count($data['message']) ? implode(PHP_EOL, $data['message']) : $data['message'];
+            $messages = implode(PHP_EOL, $data['message']);
             wc_add_notice($messages, 'error' );
         }
 
@@ -193,6 +194,16 @@ class WC_Payment_Subscription_Epayco_SE extends WC_Payment_Gateway
         } catch (Exception $exception) {
             subscription_epayco_se()->log($exception->getMessage());
         }
+    }
+
+    public function disable_non_subscription($availableGateways)
+    {
+        $enable = WC_Subscriptions_Cart::cart_contains_subscription();
+        if (!$enable && isset($availableGateways[$this->id])){
+            unset($availableGateways[$this->id]);
+        }
+
+        return $availableGateways;
     }
 
     public function confirmation_ipn(): void

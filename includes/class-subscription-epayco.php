@@ -35,18 +35,14 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
         try {
             $order_id = $params['id_order'];
             $order = new WC_Order($order_id);
-            $subscriptions = $this->getWooCommerceSubscriptionFromOrderId($order);
+            $subscriptions = wcs_get_subscriptions_for_order($order);
             /* @var WC_Subscription $subscription */
             $subscription = current($subscriptions);
             $plans = $this->getPlansBySubscription($subscriptions);
             $id_client = get_post_meta($subscription->get_id(), 'id_client', true);
 
-            $card = $this->prepareDataCard($params);
-            $token = $this->tokenCreate($card);
-            $customerData = $this->paramsBilling($subscriptions);
-            $customerData['token_card'] = $token;
-            $customerData = array_merge($customerData, $card);
-            $customerData['customer_id'] = $id_client ?: $this->customerCreate($customerData);
+            $customerData = $this->getCustomerData($params, $subscription, $id_client);
+            $id_client = $customerData['customer_id'];
 
             if(!wcs_cart_contains_renewal()){
                 $this->subscriptionCreate($plans, $customerData);
@@ -59,7 +55,7 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
             }
 
             $subs = $this->subscriptionCharge($plans, $customerData);
-            $messageStatus = $this->handleStatusSubscriptions($subs, $subscriptions, $customerData);
+            $messageStatus = $this->handleStatusSubscriptions($subs, $subscriptions, $id_client);
 
             $response_status = [
                 'status' => $messageStatus['status'],
@@ -77,15 +73,20 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
     }
 
 
-    public function tokenCreate(array $data):string
+    public function tokenCreate(array $params):string
     {
+
+        $card_number = $params['subscriptionepayco_number'];
+        $data['card_number'] = str_replace(' ','', $card_number);
+        $card_expire = explode('/', $params['subscriptionepayco_expiry']);
+        $data['cvc'] = $params['subscriptionepayco_cvc'];
 
         try{
             $token = $this->epayco->token->create(
                 [
                     "card[number]" => $data['card_number'],
-                    "card[exp_year]" => $data['card_expire_year'],
-                    "card[exp_month]" => $data['card_expire_month'],
+                    "card[exp_year]" => $card_expire[1],
+                    "card[exp_month]" => $card_expire[0],
                     "card[cvc]" => $data['cvc']
                 ]
             );
@@ -109,7 +110,7 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
             $customer = $this->epayco->customer->create(
                 [
                     "token_card" => $data['token_card'],
-                    "name" => $data['card_holder_name'],
+                    "name" => $data['subscriptionepayco_name'],
                     "email" => $data['email'],
                     "phone" => $data['phone'],
                     "cell_phone" => $data['phone'],
@@ -244,42 +245,17 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
         }
     }
 
-    private function getWooCommerceSubscriptionFromOrderId($order, $args = []): array
-    {
-        return wcs_get_subscriptions_for_order($order, $args);
-    }
-
-    public function prepareDataCard(array $params): array
+    public function paramsBilling(WC_Subscription $subscription, array $params): array
     {
         $data = [];
-
-        $card_number = $params['subscriptionepayco_number'];
-        $data['card_number'] = str_replace(' ','', $card_number);
-        $card_expire = explode('/', $params['subscriptionepayco_expiry']);
-        $data['cvc'] = $params['subscriptionepayco_cvc'];
-
-
-        $data['card_expire_year'] = $card_expire[1];
-        $data['card_expire_month'] = $card_expire[0];
-        $data['card_holder_name'] = $params['subscriptionepayco_name'];
-
-        return $data;
-
-    }
-
-    public function paramsBilling($subscriptions): array
-    {
-        $data = [];
-
-        $subscription = end($subscriptions);
 
         $data['email'] = $subscription->get_billing_email();
         $data['phone'] = $subscription->get_billing_phone();
         $data['country'] = $subscription->get_shipping_country() ? $subscription->get_shipping_country() : $subscription->get_billing_country();
         $data['city'] = $subscription->get_shipping_city() ? $subscription->get_shipping_city() : $subscription->get_billing_city();
         $data['address'] = $subscription->get_shipping_address_1() ? $subscription->get_shipping_address_1() . " " . $subscription->get_shipping_address_2() : $subscription->get_billing_address_1() . " " . $subscription->get_billing_address_2();
-        $data['doc_number'] = get_post_meta( $subscription->get_id(), '_billing_dni', true );
-        $data['type_document'] = get_post_meta( $subscription->get_id(), '_billing_type_document', true );
+        $data['doc_number'] = isset($params['billing_dni']) && $params['billing_dni'] ? $params['billing_dni'] : $params['shipping_dni'];
+        $data['type_document'] = isset($params['billing_type_document']) && $params['billing_type_document'] ? $params['billing_type_document'] : $params['shipping_type_document'];
 
         return $data;
     }
@@ -385,7 +361,7 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
         return $url;
     }
 
-    public function handleStatusSubscriptions(array $subscriptionsStatus, array $subscriptions, array $customer): array
+    public function handleStatusSubscriptions(array $subscriptionsStatus, array $subscriptions, string $id_client): array
     {
 
         global $wpdb;
@@ -396,8 +372,6 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
         $messageStatus['status'] = true;
         $messageStatus['message'] = [];
 
-        $quantitySubscriptions = count($subscriptionsStatus);
-
         /**
          * @var $subscription WC_Subscription
          */
@@ -407,7 +381,7 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
             $sub = $subscriptionsStatus[$count];
 
             if(isset($sub->data->status) && $sub->data->status === 'error' && isset($sub->data->errors) && !is_array($sub->data->errors)){
-                $messageStatus['message'] = array_merge($messageStatus['message'], [$sub->data->errors]);
+                $messageStatus['message'] = [...$messageStatus['message'], $sub->data->errors];
             }
 
             if(isset($sub->data->status) && is_array($sub->data->errors) && $sub->data->status === 'error'){
@@ -416,20 +390,20 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
                     return $error->errorMessage;
                 }, $sub->data->errors);
 
-                $messageStatus['message'] = array_merge($messageStatus['message'], $errorMessages);
+                $messageStatus['message'] = [...$messageStatus['message'], $errorMessages];
             }
 
             if(isset($sub->data->status->errors->errorMessage) && $sub->data->status === 'error'){
-                $messageStatus['message'] = array_merge($messageStatus['message'], [$sub->data->status->errors->errorMessage]);
+                $messageStatus['message'] = [...$messageStatus['message'], $sub->data->status->errors->errorMessage];
             }
 
             if(isset($sub->data->status) && $sub->data->status === 'error' && isset($sub->data->description) &&
                 !isset($sub->data->status->errors->errorMessage) && !isset($sub->data->errors)){
-                $messageStatus['message'] = array_merge($messageStatus['message'], [ $sub->data->description ]);
+                $messageStatus['message'] = [...$messageStatus['message'], $sub->data->description];
             }
 
             if (isset($sub->data->cod_respuesta) && $sub->data->cod_respuesta === 2 || $sub->data->cod_respuesta === 4){
-                $messageStatus['message'] = array_merge($messageStatus['message'], [ "{$sub->data->estado}: {$sub->data->respuesta}" ]);
+                $messageStatus['message'] = [...$messageStatus['message'], "{$sub->data->estado}: {$sub->data->respuesta}"];
             }
 
             if (isset($sub->data->cod_respuesta) && $sub->data->cod_respuesta === 1){
@@ -458,13 +432,10 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
                 );
             }
 
-            $count++;
-
-            if ($count === $quantitySubscriptions && count($messageStatus['message']) >= $count)
-                $messageStatus['status'] = false;
-
-            update_post_meta($subscription->get_id(), 'id_client', $customer['customer_id']);
+            update_post_meta($subscription->get_id(), 'id_client', $id_client);
         }
+
+        if (count($messageStatus['message'])) $messageStatus['status'] = false;
 
         return $messageStatus;
 
@@ -529,5 +500,19 @@ class Subscription_Epayco_SE extends WC_Payment_Subscription_Epayco_SE
             $ipaddress = '127.0.0.1';
 
         return $ipaddress;
+    }
+
+    protected function getCustomerData(array $params, WC_Subscription $subscription, mixed $id_client): array
+    {
+        try {
+            $token = $this->tokenCreate($params);
+            $customerData = $this->paramsBilling($subscription, $params);
+            $customerData['token_card'] = $token;
+            $customerData = array_merge($customerData, $params);
+            $customerData['customer_id'] = $id_client ?: $this->customerCreate($customerData);
+            return $customerData;
+        }catch(Exception $exception){
+            throw new Exception($exception->getMessage());
+        }
     }
 }
